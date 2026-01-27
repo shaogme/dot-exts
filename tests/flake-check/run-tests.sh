@@ -14,6 +14,10 @@ echo "Checking Flake integration..."
 # 3. Kernel and Btrfs configurations are valid and don't conflict
 # 4. Top-level derivation can be instantiated
 
+# Clean up previous results if any
+rm -f result
+
+
 nix build .#nixosConfigurations.testMachine.config.system.build.toplevel --dry-run --show-trace \
   --extra-experimental-features flakes \
   --option substituters "$CACHE_Substituters" \
