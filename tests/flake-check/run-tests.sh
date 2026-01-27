@@ -16,10 +16,13 @@ echo "Checking Flake integration..."
 
 # Clean up previous results if any
 rm -f result
+# Remove flake.lock to avoid "unlocked input" errors with path inputs
+rm -f flake.lock
 
 
 nix build .#nixosConfigurations.testMachine.config.system.build.toplevel --dry-run --show-trace \
   --extra-experimental-features flakes \
+  --no-write-lock-file \
   --option substituters "$CACHE_Substituters" \
   --option trusted-public-keys "$CACHE_TrustedPublicKeys" \
   --allow-dirty
