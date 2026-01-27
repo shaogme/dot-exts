@@ -21,7 +21,7 @@
           # 'imageBaseSize' has no default, must be set
           exts.hardware.disk.imageBaseSize = 2048;
           
-          # --- CachyOS Config (Optional, enabled by default) ---
+          # --- CachyOS Config ---
           exts.kernel.cachyos.enable = true;
 
           # --- Minimal System Requirements ---

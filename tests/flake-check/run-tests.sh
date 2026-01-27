@@ -14,6 +14,8 @@ echo "Checking Flake integration..."
 # 3. Kernel and Btrfs configurations are valid and don't conflict
 # 4. Top-level derivation can be instantiated
 
-nix build .#nixosConfigurations.testMachine.config.system.build.toplevel --dry-run --show-trace --extra-experimental-features flakes
+nix build .#nixosConfigurations.testMachine.config.system.build.toplevel --dry-run --show-trace --extra-experimental-features flakes  \
+  --option substituters "$CACHE_Substituters" \
+  --option trusted-public-keys "$CACHE_TrustedPublicKeys"
 
 echo "Flake integration check passed: Top-level derivation is valid."
