@@ -50,46 +50,106 @@
 }
 ```
  
-#### 选项 B: 传统方式 (Legacy)
+#### 选项 B: 传统方式 (npins)
  
-在你的 NixOS 配置中（通过自动加载器或直接 import）：
+推荐使用 `npins` 来管理依赖，替代传统的 `fetchTarball` 或 `git submodule`。
+ 
+1. 初始化并添加本仓库依赖：
+ 
+```bash
+npins init
+npins add github -b main shaogme dot-exts
+```
+ 
+2. 在像配置中引入：
  
 ```nix
 { pkgs, ... }:
 let
-  # 假设你已经获取了本仓库的源码路径
-  myRepo = import ./path/to/repo { inherit pkgs; };
+  sources = import ./npins;
+  # 获取 dot-exts 仓库实例
+  dot-exts = import sources.dot-exts { inherit pkgs; };
 in
 {
   imports = [
     # 导入 Btrfs 磁盘配置模块
-    myRepo.hardware.disk-config.btrfs.nixosModule
+    dot-exts.hardware.disk-config.btrfs.nixosModule
   ];
  
   # ... 其他配置
 }
 ```
 
-### 2. 配置选项
+### 3. npins 方式完整安装示例
 
-通过 `exts.hardware.disk` 命名空间进行配置：
-
+以下展示了通过 standard 方式（非 Flake），结合 `npins` 管理依赖并使用 `disko-entrypoint.nix` 进行部署的完整流程。
+ 
+这种方式允许文件既作为 NixOS 模块被引入，又可以被 `disko` CLI 直接调用以执行分区。
+ 
+**disko-entrypoint.nix (双模式入口)**:
+ 
 ```nix
-{ config, ... }:
+{ pkgs ? import <nixpkgs> { }, modulesPath ? null, ... }:
+ 
+if modulesPath != null then
+  # ---------------------------------------------------------
+  # Mode 1: NixOS Module (Imported by configuration.nix)
+  # ---------------------------------------------------------
+  let
+    sources = import ./npins;
+    dot-exts = import sources.dot-exts { inherit pkgs; };
+  in
+  {
+    imports = [
+      # 通过导出的结构引入模块 (包含 disko)
+      dot-exts.hardware.disk-config.btrfs.nixosModule
+    ];
+ 
+    # 配置模块
+    config.exts.hardware.disk = {
+      enable = true;
+      device = "/dev/sda"; # 建议使用 /dev/disk/by-id/...
+      swapSize = 4096;
+      imageBaseSize = 3072;
+    };
+  }
+else
+  # ---------------------------------------------------------
+  # Mode 2: CLI Entrypoint (Called by disko CLI)
+  # ---------------------------------------------------------
+  {
+    # 假设 ./host/default.nix 是您的系统构建入口 (调用了 lib.nixosSystem)
+    disko.devices = (import ./host/default.nix).config.disko.devices;
+  }
+```
+ 
+**configuration.nix (配置示例)**:
+ 
+```nix
+{ config, pkgs, ... }:
 {
-  config.exts.hardware.disk = {
-    # [必填] 启用磁盘配置模块
-    enable = true;
-
-    # [可选] 目标磁盘设备路径 (默认: "/dev/sda")
-    # 对于 NVMe 硬盘通常是 "/dev/nvme0n1"
-    device = "/dev/vda";
-
-    # [可选] Swap 分区大小 (单位: MB)
-    # 设置为 0 或 null 以禁用 Swap 分区 (默认: 0)
-    swapSize = 4096; # 创建 4GB 的 Swap
-  };
+  imports = [
+    ./disko-entrypoint.nix
+    # ... 其他模块 imports
+  ];
+ 
+  # ... 系统基础配置
+  system.stateVersion = "24.05";
+  networking.hostName = "nixos-machine";
+ 
+  boot.loader.grub.enable = true;
 }
+```
+ 
+**安装与构建指令**：
+ 
+```bash
+# 1. 使用 disko 命令行工具进行分区 (Mode 2)
+# 这会读取 host/default.nix -> configuration.nix -> disko-entrypoint.nix (Mode 1) -> 生成分区配置
+sudo disko --mode disko disko-entrypoint.nix
+ 
+# 2. 构建系统并安装到挂载点 /mnt
+sudo nixos-install --root /mnt --system $(nix-build host/default.nix -A system --no-out-link)
 ```
 
 ## 测试 (Testing)
