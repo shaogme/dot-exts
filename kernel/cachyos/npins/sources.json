@@ -9,9 +9,9 @@
       },
       "branch": "release",
       "submodules": false,
-      "revision": "6d28de311a89aaa6b9d15839318e680b8b383802",
-      "url": "https://github.com/xddxdd/nix-cachyos-kernel/archive/6d28de311a89aaa6b9d15839318e680b8b383802.tar.gz",
-      "hash": "sha256-0JntMLEjuefUkk/kgmrLAmBcKqduBSLRuOX22rFGK/E="
+      "revision": "220dce3edcb81188ecb896382699884243d1c2e3",
+      "url": "https://github.com/xddxdd/nix-cachyos-kernel/archive/220dce3edcb81188ecb896382699884243d1c2e3.tar.gz",
+      "hash": "sha256-VpbF4JDFPSW2crh0tP5EiegnuTkj3fACs0SLWDhlfPM="
     }
   },
   "version": 7
