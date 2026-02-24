@@ -9,9 +9,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "4707eec8d1d2db5182ea06ed48c820a86a42dc13",
-      "url": "https://github.com/nix-community/disko/archive/4707eec8d1d2db5182ea06ed48c820a86a42dc13.tar.gz",
-      "hash": "sha256-GnqdqhrguKNN3HtVfl6z+zbV9R9jhHFm3Z8nu7R6ml0="
+      "revision": "a4cb7bf73f264d40560ba527f9280469f1f081c6",
+      "url": "https://github.com/nix-community/disko/archive/a4cb7bf73f264d40560ba527f9280469f1f081c6.tar.gz",
+      "hash": "sha256-A5uE/hMium5of/QGC6JwF5TGoDAfpNtW00T0s9u/PN8="
     }
   },
   "version": 7
