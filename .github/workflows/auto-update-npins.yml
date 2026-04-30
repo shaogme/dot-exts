@@ -18,6 +18,7 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install Nix
         uses: cachix/install-nix-action@master
@@ -33,7 +34,7 @@ jobs:
           ./update-npins.sh
       
       - name: Update Flake Lock
-        run: nix flake update --extra-experimental-features flakes
+        run: nix flake update --extra-experimental-features 'nix-command flakes'
 
       - name: Create Pull Request
         id: cpr
