@@ -111,3 +111,90 @@ in
 - **提交 `sources.json`**：务必将 `npins/sources.json` 提交到 Git 仓库，它记录了确切的版本和哈希。
 - **定期更新**：使用 `npins update` 保持依赖项处于最新状态。
 - **不要手动修改 `default.nix`**：该文件由 `npins` 自动生成，手动修改会在下次执行 `npins init` 或升级时被覆盖。
+
+## 7. npins 与 Flake 的语法差异
+
+`npins` 和 `flake.nix` 在处理依赖项时的核心差异在于管理方式和引用深度：
+
+| 特性 | Flake (`flake.nix`) | npins (`sources.json`) |
+| :--- | :--- | :--- |
+| **定义位置** | `inputs` 属性集 | `npins/sources.json` 文件 |
+| **引用方式** | `inputs.<name>` | `sources.<name>` |
+| **锁定机制** | `flake.lock` (由 Nix 自动生成和管理) | `sources.json` (由 npins 工具显式更新) |
+| **环境要求** | 需要开启 Flake 实验性特性 | 兼容标准 Nix (Stable)，无需特殊配置 |
+| **类型解析** | 通常返回一个复杂的属性集 (包含 `outputs`, `rev` 等) | 返回一个包含 `outPath` 的函子 (可直接作为路径字符串) |
+
+## 8. 从 Flake 语法迁移到 npins
+
+如果你正在将依赖管理从 Flake 迁移到 npins，主要的工作是将声明式的 `inputs` 映射到 `sources.json` 中的结构。
+
+### 声明对比
+
+**Flake (`flake.nix`):**
+```nix
+inputs.my-repo.url = "github:user/repo/revision";
+```
+
+**npins (`sources.json` 内部等效逻辑):**
+```json
+"my-repo": {
+  "type": "Git",
+  "repository": {
+    "type": "GitHub",
+    "owner": "user",
+    "repo": "repo"
+  },
+  "revision": "revision",
+  "hash": "sha256-..."
+}
+```
+
+> [!TIP]
+> 禁止手动创建或修改 `npins/sources.json`， 必须使用npins工具来管理。
+
+### 引用迁移
+
+在代码中使用时，通常按照以下方式替换：
+
+- **Flake 风格**: `imports = [ inputs.disko.nixosModules.disko ];`
+- **npins 风格**: `imports = [ "${sources.disko}/module.nix" ];` （直接通过文件路径导入）
+
+> [!TIP]
+> `npins` 的优势在于它不需要在顶层 `flake.nix` 中声明所有依赖，每个子目录都可以有自己的 `npins/` 目录，实现依赖的局部化管理。
+
+## 9. 使用 Flake 桥接 npins
+
+### 在 Flake 的 outputs 中暴露 npins 模块
+
+当你的顶层是 `flake.nix`，但底层实现通过 `npins` 管理依赖时，你可以在 `outputs` 中导入子目录的 `default.nix`，并将提取出的模块或 Overlay 暴露出去。
+
+**实际实现 (`flake.nix`):**
+
+```nix
+{
+  outputs = { self, ... }:
+  let
+    # 导入包含 npins 逻辑的子目录，并提取 nixosModule
+    kernel-cachyos = (import ./kernel/cachyos { pkgs = { }; }).nixosModule;
+    disk-btrfs = (import ./hardware/disk-config/btrfs { pkgs = { }; }).nixosModule;
+  in
+  {
+    nixosModules = {
+      # 暴露为结构化的模块
+      kernel.cachyos = kernel-cachyos;
+      hardware.disk-config.btrfs = disk-btrfs;
+      
+      # 也可以暴露为默认组合模块
+      default = { ... }: {
+        imports = [ kernel-cachyos disk-btrfs ];
+      };
+    };
+
+    # 同样可以桥接 Overlay
+    overlays.default = final: prev:
+      (import ./kernel/cachyos { pkgs = prev; }).overlay final prev;
+  };
+}
+```
+
+通过这种方式，外部 Flake 用户可以直接通过 `inputs.dot-exts.nixosModules.default` 使用你的功能，而无需感知内部是使用 `npins` 还是其他方式管理依赖。
