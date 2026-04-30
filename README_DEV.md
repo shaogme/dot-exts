@@ -2,18 +2,6 @@
 
 This directory contains the configuration for a Docker-based Linux development environment, powered by **Classic Nix** and **npins** for reproducible builds.
 
-## 0. Initial Setup (One-time)
-
-Before building the image for the first time, you must ensure dependency pins are present. We use `npins` for dependency management.
-
-```bash
-# Initialize npins if not present (already done in this repo)
-# npins init
-
-# Update dependencies
-docker-compose run --rm npins-update
-```
-
 ## 1. Prerequisites
 
 - Docker Desktop installed and running.
