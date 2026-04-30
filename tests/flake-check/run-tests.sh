@@ -21,7 +21,7 @@ rm -f flake.lock
 
 
 nix build .#nixosConfigurations.testMachine.config.system.build.toplevel --dry-run --show-trace \
-  --extra-experimental-features flakes \
+  --extra-experimental-features "flakes nix-command" \
   --no-write-lock-file \
   --option substituters "$CACHE_Substituters" \
   --option trusted-public-keys "$CACHE_TrustedPublicKeys" \

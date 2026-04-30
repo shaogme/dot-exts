@@ -9,8 +9,8 @@
 ### 核心规则
 - **优先使用 npins**：除非有极特殊理由，否则所有外部 Git 仓库、Nix Channels、PyPi 包或 Tarball 依赖都应通过 `npins` 管理。
 - **强制阅读文档**：在任何涉及 `npins` 的操作（添加、更新、维护、代码引入）之前，必须阅读并遵循以下文档：
-    - [npins CLI 详细文档](file:///root/workspace/docs/npins/cli.md)：了解如何使用命令行工具管理依赖。
-    - [npins 产物使用指南](file:///root/workspace/docs/npins/usage.md)：了解如何在 Nix 代码中正确引用和覆盖依赖。
+    - [npins CLI 详细文档](docs/npins/cli.md)：了解如何使用命令行工具管理依赖。
+    - [npins 产物使用指南](docs/npins/usage.md)：了解如何在 Nix 代码中正确引用和覆盖依赖。
 
 ## 开发工作流
 

@@ -7,24 +7,24 @@
 
   outputs = { self, ... }:
   let
-    # Load the library using the local default.nix.
-    # We pass an empty set for pkgs because we only need the module structure (attributes).
-    # The actual NixOS modules handle pkgs injection internally.
-    myLib = import ./default.nix { };
+    # Manually configure the module structure
+    kernel-cachyos = (import ./kernel/cachyos { pkgs = { }; }).nixosModule;
+    disk-btrfs = (import ./hardware/disk-config/btrfs { pkgs = { }; }).nixosModule;
   in
   {
     nixosModules = {
-      # 1. CachyOS Kernel Module
-      kernel-cachyos = myLib.kernel.cachyos.nixosModule;
+      # 1. Structured organization
+      kernel.cachyos = kernel-cachyos;
+      hardware.disk-config.btrfs = disk-btrfs;
 
-      # 2. Btrfs Disk Config Module
-      disk-btrfs = myLib.hardware.disk-config.btrfs.nixosModule;
+      # 2. Flat access (for convenience and backward compatibility)
+      inherit kernel-cachyos disk-btrfs;
 
       # 3. Default (All-in-one)
       default = { ... }: {
         imports = [
-          self.nixosModules.kernel-cachyos
-          self.nixosModules.disk-btrfs
+          kernel-cachyos
+          disk-btrfs
         ];
       };
     };
