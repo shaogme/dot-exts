@@ -20,9 +20,9 @@ jobs:
           fetch-depth: 0
 
       - name: Install Nix
-        uses: shaogme/speedy-nix@main
+        uses: cachix/install-nix-action@master
         with:
-          channel: 'https://nixos.org/channels/nixos-unstable nixpkgs'
+          nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Install npins
         run: nix-env -f '<nixpkgs>' -iA npins
