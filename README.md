@@ -50,9 +50,8 @@
         # 方法 1: 引入所有模块 (包含 CachyOS 内核和 Btrfs 磁盘配置)
         dot-exts.nixosModules.default
 
-        # 方法 2: 仅引入特定模块 (支持扁平化或层级化路径)
-        # dot-exts.nixosModules.kernel-cachyos
-        # dot-exts.nixosModules.disk-btrfs
+        # 方法 2: 仅引入特定模块 (支持层级化路径)
+        # dot-exts.nixosModules.kernel.cachyos
         # dot-exts.nixosModules.hardware.disk.btrfs
         
         {
