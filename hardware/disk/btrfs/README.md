@@ -1,8 +1,8 @@
 # 磁盘配置模块 (Disk Configuration)
 
-本模块位于 `hardware/disk-config/btrfs`，提供基于 [disko](https://github.com/nix-community/disko) 的标准化磁盘布局方案。旨在简化 NixOS 的磁盘配置过程，开箱即用。
+本模块位于 `hardware/disk/btrfs`，提供基于 [disko](https://github.com/nix-community/disko) 的标准化磁盘布局方案。旨在简化 NixOS 的磁盘配置过程，开箱即用。
 
-## Btrfs 布局方案 (`hardware.disk-config.btrfs`)
+## Btrfs 布局方案 (`hardware.disk.btrfs`)
 
 这是一个针对现代系统优化的通用 Btrfs 布局，包含以下特性：
 
@@ -73,7 +73,7 @@ in
 {
   imports = [
     # 导入 Btrfs 磁盘配置模块
-    dot-exts.hardware.disk-config.btrfs.nixosModule
+    dot-exts.hardware.disk.btrfs.nixosModule
   ];
  
   # ... 其他配置
@@ -102,11 +102,11 @@ if modulesPath != null then
   {
     imports = [
       # 通过导出的结构引入模块 (包含 disko)
-      dot-exts.hardware.disk-config.btrfs.nixosModule
+      dot-exts.hardware.disk.btrfs.nixosModule
     ];
  
     # 配置模块
-    config.exts.hardware.disk = {
+    config.exts.hardware.disk.btrfs = {
       enable = true;
       device = "/dev/sda"; # 建议使用 /dev/disk/by-id/...
       swapSize = 4096;
@@ -161,7 +161,7 @@ sudo nixos-install --root /mnt --system $(nix-build host/default.nix -A system -
 在仓库根目录下，执行脚本运行完整测试套件：
 
 ```bash
-./hardware/disk-config/btrfs/tests/run-tests.sh
+./hardware/disk/btrfs/tests/run-tests.sh
 ```
 
 该脚本会依次执行两个阶段：

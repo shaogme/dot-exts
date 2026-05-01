@@ -12,15 +12,15 @@ let
     system = "x86_64-linux";
     modules = [
       # 导入我们要测试的模块
-      repo.hardware.disk-config.btrfs.nixosModule
+      repo.hardware.disk.btrfs.nixosModule
 
       # 基础配置
       ({ config, lib, ... }: {
         # 启用模块
-        exts.hardware.disk.enable = true;
-        exts.hardware.disk.device = "/dev/vda";
-        exts.hardware.disk.swapSize = 4096;
-        exts.hardware.disk.imageBaseSize = 3072;
+        exts.hardware.disk.btrfs.enable = true;
+        exts.hardware.disk.btrfs.device = "/dev/vda";
+        exts.hardware.disk.btrfs.swapSize = 4096;
+        exts.hardware.disk.btrfs.imageBaseSize = 3072;
 
         # 设置 stateVersion 以避免警告
         system.stateVersion = "23.11";

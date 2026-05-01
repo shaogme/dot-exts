@@ -6,7 +6,7 @@ in
   nixosModule = { lib, config, pkgs, ... }: {
     imports = [ "${sources.disko}/module.nix" ];
 
-    options.exts.hardware.disk = {
+    options.exts.hardware.disk.btrfs = {
       enable = lib.mkEnableOption "Disk Configuration";
       
       device = lib.mkOption {
@@ -27,8 +27,8 @@ in
       };
     };
 
-    config = lib.mkIf config.exts.hardware.disk.enable (let
-      cfg = config.exts.hardware.disk;
+    config = lib.mkIf config.exts.hardware.disk.btrfs.enable (let
+      cfg = config.exts.hardware.disk.btrfs;
       # Handle swapSize being null, treating it as 0
       safeSwapSize = if cfg.swapSize != null then cfg.swapSize else 0;
       imageSize = "${toString (safeSwapSize + cfg.imageBaseSize)}M";

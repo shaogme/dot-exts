@@ -17,9 +17,9 @@
         
         {
           # --- Disk Config Requirements ---
-          exts.hardware.disk.enable = true;
+          exts.hardware.disk.btrfs.enable = true;
           # 'imageBaseSize' has no default, must be set
-          exts.hardware.disk.imageBaseSize = 2048;
+          exts.hardware.disk.btrfs.imageBaseSize = 2048;
           
           # --- CachyOS Config ---
           exts.kernel.cachyos.enable = true;

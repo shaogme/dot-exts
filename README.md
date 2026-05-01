@@ -20,11 +20,11 @@
 *   **网络优化**: 默认启用 BBRv3 TCP 拥塞控制与 CAKE 队列管理。
 *   **详细文档**: [kernel/cachyos/README.md](./kernel/cachyos/README.md)
 
-### 2. Btrfs 磁盘配置 (`hardware.disk-config.btrfs`)
+### 2. Btrfs 磁盘配置 (`hardware.disk.btrfs`)
 提供开箱即用的 Btrfs 分区与子卷布局方案。
 *   **标准布局**: 包含 ESP, Boot, Swap 及优化过的 Btrfs 子卷 (`@`, `@home`, `@nix`, `@log`)。
 *   **透明压缩**: 默认启用 `zstd:3` 压缩以节省空间并提升 I/O 吞吐。
-*   **详细文档**: [hardware/disk-config/btrfs/README.md](./hardware/disk-config/btrfs/README.md)
+*   **详细文档**: [hardware/disk/btrfs/README.md](./hardware/disk/btrfs/README.md)
 
 ## 🚀 快速开始 (Getting Started)
 
@@ -53,12 +53,12 @@
         # 方法 2: 仅引入特定模块 (支持扁平化或层级化路径)
         # dot-exts.nixosModules.kernel-cachyos
         # dot-exts.nixosModules.disk-btrfs
-        # dot-exts.nixosModules.hardware.disk-config.btrfs
+        # dot-exts.nixosModules.hardware.disk.btrfs
         
         {
           # 启用并配置模块功能
-          exts.hardware.disk.enable = true;
-          exts.hardware.disk.device = "/dev/nvme0n1"; 
+          exts.hardware.disk.btrfs.enable = true;
+          exts.hardware.disk.btrfs.device = "/dev/nvme0n1"; 
           
           exts.kernel.cachyos.enable = true;
         }
@@ -86,12 +86,12 @@ in
     # 引入 CachyOS 内核模块
     myLib.kernel.cachyos.nixosModule
     # 引入 Btrfs 磁盘配置模块
-    myLib.hardware.disk-config.btrfs.nixosModule
+    myLib.hardware.disk.btrfs.nixosModule
   ];
 
   # 启用并配置模块功能
-  exts.hardware.disk.enable = true;      # 启用磁盘配置
-  exts.hardware.disk.device = "/dev/nvme0n1"; 
+  exts.hardware.disk.btrfs.enable = true;      # 启用磁盘配置
+  exts.hardware.disk.btrfs.device = "/dev/nvme0n1"; 
 
   exts.kernel.cachyos.enable = true;       # 启用 CachyOS 内核
 }

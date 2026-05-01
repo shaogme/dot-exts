@@ -82,7 +82,7 @@ nixos-rebuild switch ...
 
 ## 5. 项目中的实际案例
 
-在 `hardware/disk-config/btrfs/default.nix` 中：
+在 `hardware/disk/btrfs/default.nix` 中：
 
 ```nix
 { pkgs, ... }:
@@ -96,7 +96,7 @@ in
     imports = [ "${sources.disko}/module.nix" ];
 
     # ... 其他配置
-    config = lib.mkIf config.exts.hardware.disk.enable {
+    config = lib.mkIf config.exts.hardware.disk.btrfs.enable {
       # 使用 disko 提供的配置项
       disko.devices.disk.main = {
         # ...
@@ -176,13 +176,13 @@ inputs.my-repo.url = "github:user/repo/revision";
   let
     # 导入包含 npins 逻辑的子目录，并提取 nixosModule
     kernel-cachyos = (import ./kernel/cachyos { pkgs = { }; }).nixosModule;
-    disk-btrfs = (import ./hardware/disk-config/btrfs { pkgs = { }; }).nixosModule;
+    disk-btrfs = (import ./hardware/disk/btrfs { pkgs = { }; }).nixosModule;
   in
   {
     nixosModules = {
       # 暴露为结构化的模块
       kernel.cachyos = kernel-cachyos;
-      hardware.disk-config.btrfs = disk-btrfs;
+      hardware.disk.btrfs = disk-btrfs;
       
       # 也可以暴露为默认组合模块
       default = { ... }: {

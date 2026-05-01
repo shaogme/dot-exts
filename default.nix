@@ -6,8 +6,8 @@ let
 in
 {
   hardware = {
-    disk-config = {
-      btrfs = callExt ./hardware/disk-config/btrfs;
+    disk = {
+      btrfs = callExt ./hardware/disk/btrfs;
     };
   };
   kernel = {

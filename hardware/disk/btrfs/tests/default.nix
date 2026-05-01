@@ -23,7 +23,7 @@ let
 in
 {
   # 1. 静态检查任务：构建这个 derivation 会运行所有的 assert 检查
-  staticCheck = pkgs.runCommand "disk-config-static-check" {} ''
+  staticCheck = pkgs.runCommand "disk-static-check" {} ''
     echo "Evaluating Static Checks..."
     echo "Checks result: ${toString allChecks}"
     echo "Verifying generated Disko script syntax..."
