@@ -17,7 +17,6 @@ let
       # 基础配置
       ({ config, lib, ... }: {
         # 启用模块
-        # 启用模块
         exts.hardware.disk.enable = true;
         exts.hardware.disk.device = "/dev/vda";
         exts.hardware.disk.swapSize = 4096;

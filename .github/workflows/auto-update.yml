@@ -1,4 +1,4 @@
-name: Auto Update Npins
+name: Auto Update
 
 on:
   schedule:

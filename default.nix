@@ -1,4 +1,4 @@
-{ pkgs ? {} }:
+{ pkgs }:
 let
   lib = pkgs.lib;
   # Function to inject pkgs into subdirectory modules
