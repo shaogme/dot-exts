@@ -13,10 +13,7 @@ in
     kernel.cachyos = cachyos.nixosModule;
     
     default = { ... }: {
-      imports = [
-        btrfs.nixosModule
-        cachyos.nixosModule
-      ];
+      imports = [ ];
     };
   };
 

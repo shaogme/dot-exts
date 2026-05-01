@@ -13,7 +13,8 @@
       system = "x86_64-linux";
       modules = [
         # Import the library via Flake
-        dot-exts.nixosModules.default
+        dot-exts.nixosModules.kernel.cachyos
+        dot-exts.nixosModules.hardware.disk.btrfs
         
         {
           # --- Disk Config Requirements ---

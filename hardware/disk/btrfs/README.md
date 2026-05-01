@@ -41,9 +41,9 @@
     nixosConfigurations.my-machine = nixpkgs.lib.nixosSystem {
       # ...
       modules = [
-        dot-exts.nixosModules.disk-btrfs
+        dot-exts.nixosModules.hardware.disk.btrfs
  
-        # 或者通过 dot-exts.nixosModules.default 引入所有模块
+        # 注意: dot-exts.nixosModules.default 目前是空模块，不自动引入任何组件
       ];
     };
   };

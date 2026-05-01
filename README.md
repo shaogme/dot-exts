@@ -47,12 +47,12 @@
     nixosConfigurations.my-machine = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
-        # 方法 1: 引入所有模块 (包含 CachyOS 内核和 Btrfs 磁盘配置)
-        dot-exts.nixosModules.default
+        # 默认空模块 (不自动引入任何组件)
+        # dot-exts.nixosModules.default
 
-        # 方法 2: 仅引入特定模块 (支持层级化路径)
-        # dot-exts.nixosModules.kernel.cachyos
-        # dot-exts.nixosModules.hardware.disk.btrfs
+        # 引入特定模块
+        dot-exts.nixosModules.kernel.cachyos
+        dot-exts.nixosModules.hardware.disk.btrfs
         
         {
           # 启用并配置模块功能

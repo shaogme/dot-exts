@@ -172,29 +172,21 @@ inputs.my-repo.url = "github:user/repo/revision";
 
 ```nix
 {
-  outputs = { self, ... }:
-  let
-    # 导入包含 npins 逻辑的子目录，并提取 nixosModule
-    kernel-cachyos = (import ./kernel/cachyos { pkgs = { }; }).nixosModule;
-    disk-btrfs = (import ./hardware/disk/btrfs { pkgs = { }; }).nixosModule;
-  in
-  {
-    nixosModules = {
-      # 暴露为结构化的模块
-      kernel.cachyos = kernel-cachyos;
-      hardware.disk.btrfs = disk-btrfs;
-      
-      # 也可以暴露为默认组合模块
-      default = { ... }: {
-        imports = [ kernel-cachyos disk-btrfs ];
+  outputs = { self }:
+    let
+      # 导入包含 npins 逻辑的入口，并提取 nixosModules
+      # 这里的 pkgs = { } 仅用于获取静态的模块定义
+      exts = import ./default.nix { pkgs = { }; };
+    in
+    {
+      inherit (exts) nixosModules;
+
+      # 暴露一个库函数，允许外部用户显式注入特定的 pkgs
+      lib = {
+        withPkgs = pkgs: import ./default.nix { inherit pkgs; };
       };
     };
-
-    # 同样可以桥接 Overlay
-    overlays.default = final: prev:
-      (import ./kernel/cachyos { pkgs = prev; }).overlay final prev;
-  };
 }
 ```
 
-通过这种方式，外部 Flake 用户可以直接通过 `inputs.dot-exts.nixosModules.default` 使用你的功能，而无需感知内部是使用 `npins` 还是其他方式管理依赖。
+通过这种方式，外部 Flake 用户可以直接通过 `inputs.dot-exts.nixosModules.hardware.disk.btrfs` 使用你的功能，而无需感知内部是使用 `npins` 还是其他方式管理依赖。注意 `nixosModules.default` 目前是作为占位符的空模块。
