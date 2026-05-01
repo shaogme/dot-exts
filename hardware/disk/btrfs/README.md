@@ -152,6 +152,17 @@ sudo disko --mode disko disko-entrypoint.nix
 sudo nixos-install --root /mnt --system $(nix-build host/default.nix -A system --no-out-link)
 ```
 
+## 测试模式 (`exts.testMode`)
+
+为了方便在 CI 环境或虚拟机中进行配置验证而无需进行真实的磁盘分区，本模块支持全局 `exts.testMode` 选项。
+
+*   **启用方式**: 在系统配置中设置 `exts.testMode = true;`。
+*   **行为变化**:
+    *   **禁用 Disko**: 不再定义 `disko.devices`，防止 `disko` 尝试格式化磁盘。
+    *   **禁用引导加载程序**: 自动关闭 GRUB 和 EFI 相关配置，避免在非物理环境下安装引导失败。
+    *   **保留驱动**: 依然保留 `boot.supportedFilesystems = [ "btrfs" ]` 等基础环境支持。
+*   **适用场景**: 仅需要验证配置能否通过 Nix 评估（Eval），或者在已经分好区的环境中运行测试。
+
 ## 测试 (Testing)
 
 该模块包含一套自动化测试套件，用于确保磁盘布局逻辑的准确性和配置的可构建性。

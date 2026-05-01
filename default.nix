@@ -6,14 +6,23 @@ let
   
   btrfs = callExt ./hardware/disk/btrfs;
   cachyos = callExt ./kernel/cachyos;
+
+  # Base module with global options
+  baseModule = ./core/options.nix;
+
+  # Helper to wrap a module with base dependencies
+  wrapModule = m: {
+    imports = [ baseModule m ];
+  };
 in
 {
   nixosModules = {
-    hardware.disk.btrfs = btrfs.nixosModule;
-    kernel.cachyos = cachyos.nixosModule;
+    hardware.disk.btrfs = wrapModule btrfs.nixosModule;
+    kernel.cachyos = wrapModule cachyos.nixosModule;
+    testMode = baseModule;
     
     default = { ... }: {
-      imports = [ ];
+      imports = [ baseModule ];
     };
   };
 

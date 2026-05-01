@@ -24,7 +24,16 @@
 提供开箱即用的 Btrfs 分区与子卷布局方案。
 *   **标准布局**: 包含 ESP, Boot, Swap 及优化过的 Btrfs 子卷 (`@`, `@home`, `@nix`, `@log`)。
 *   **透明压缩**: 默认启用 `zstd:3` 压缩以节省空间并提升 I/O 吞吐。
+*   **测试模式兼容**: 支持 `exts.testMode`。在测试模式开启时，会自动禁用物理分区操作与引导安装，仅保留文件系统驱动支持。
 *   **详细文档**: [hardware/disk/btrfs/README.md](./hardware/disk/btrfs/README.md)
+
+## ⚙️ 全局配置 (Global Configuration)
+
+本项目提供了一些影响所有模块行为的全局选项。
+
+| 选项 (Option) | 类型 (Type) | 默认值 (Default) | 描述 (Description) |
+| :--- | :--- | :--- | :--- |
+| `exts.testMode` | `boolean` | `false` | **测试模式**。开启后将禁用所有具有破坏性或物理环境依赖的配置（如磁盘分区、引导加载程序安装等）。主要用于 CI 验证和虚拟机测试。 |
 
 ## 🚀 快速开始 (Getting Started)
 
