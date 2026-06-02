@@ -26,10 +26,10 @@ for npins_path in $FOUND_DIRS; do
     
     pushd "$work_dir" > /dev/null
     
-    if npins update; then
-        echo "Update successful in $work_dir"
+    if npins upgrade && npins update; then
+        echo "Upgrade and update successful in $work_dir"
     else
-        echo "Update failed in $work_dir"
+        echo "Upgrade/Update failed in $work_dir"
         exit 1
     fi
     
