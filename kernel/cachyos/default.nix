@@ -31,6 +31,9 @@ in
         # 使用最新版 CachyOS 内核
         boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
 
+        # 显式禁用设备树，避免因 CachyOS 内核缺失 buildDTBs 属性导致评估报错
+        hardware.deviceTree.enable = lib.mkDefault false;
+
         # 确保加载 BBR 模块 (对于 CachyOS 内核，tcp_bbr 即为 BBRv3)
         boot.kernelModules = [ "tcp_bbr" ];
 
