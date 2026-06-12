@@ -30,7 +30,10 @@ let
   config = testResult.config;
 
 in
-pkgs.runCommand "test-kernel-cachyos" { } ''
+pkgs.runCommand "test-kernel-cachyos" {
+  # 强制评估完整系统构建链路，以诊断/捕获系统激活层（如 bootloader/kernelFile 等）的隐式求值错误
+  toplevel = testResult.config.system.build.toplevel;
+} ''
   # 1. Check if kernel package is set correctly to cachyos
   # Note: The actual package name might vary, we check if it contains "cachyos" in the name or description
   if [[ "${config.boot.kernelPackages.kernel.name}" == *"cachyos"* ]]; then

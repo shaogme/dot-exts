@@ -28,8 +28,12 @@ in
         # 必须应用 overlay 才能在 pkgs 中找到 cachyosKernels
         nixpkgs.overlays = [ cachyosFlake.outputs.overlays.pinned ];
 
-        # 使用最新版 CachyOS 内核
-        boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
+        # 使用最新版 CachyOS 内核并修复 override 导致 target 属性丢失的问题
+        boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest.extend (self: super: {
+          kernel = builtins.removeAttrs super.kernel [ "override" ] // {
+            target = "bzImage";
+          };
+        });
 
         # 显式禁用设备树，避免因 CachyOS 内核缺失 buildDTBs 属性导致评估报错
         hardware.deviceTree.enable = lib.mkDefault false;
