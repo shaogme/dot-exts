@@ -21,6 +21,9 @@ let
         
         # Mocking necessary system settings
         system.stateVersion = "23.11";
+
+        # Simulate extraModulePackages to trigger NixOS aggregateModules logic
+        boot.extraModulePackages = [ pkgs.hello ];
       }
     ];
     inherit pkgs;
@@ -65,6 +68,14 @@ pkgs.runCommand "test-kernel-cachyos" {
     echo "PASS: Default qdisc is cake"
   else
     echo "FAIL: Default qdisc is NOT cake. Got: ${config.boot.kernel.sysctl."net.core.default_qdisc"}"
+    exit 1
+  fi
+
+  # 5. Check if kernel has valid target attribute (to prevent disko / vmTools build errors)
+  if [[ "${config.boot.kernelPackages.kernel.target or "missing"}" != "missing" ]]; then
+    echo "PASS: Kernel has valid target attribute: ${config.boot.kernelPackages.kernel.target}"
+  else
+    echo "FAIL: Kernel is missing target attribute"
     exit 1
   fi
 

@@ -26,19 +26,25 @@ in
 
       config = lib.mkIf cfg.enable {
         # 必须应用 overlay 才能在 pkgs 中找到 cachyosKernels
-        nixpkgs.overlays = [ cachyosFlake.outputs.overlays.pinned ];
+        nixpkgs.overlays = [
+          cachyosFlake.outputs.overlays.pinned
+          (final: prev: {
+            aggregateModules = packages:
+              let
+                drv = prev.aggregateModules packages;
+                firstKernel = builtins.head packages;
+                targetVal = firstKernel.target or firstKernel.passthru.target or "bzImage";
+              in
+              drv.overrideAttrs (old: {
+                passthru = (old.passthru or {}) // {
+                  target = targetVal;
+                };
+              }) // { target = targetVal; };
+          })
+        ];
 
-        # 使用最新版 CachyOS 内核并包裹其 override 方法，防止 NixOS 重载后丢失 target 属性
-        boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest.extend (self: super: {
-          kernel =
-            let
-              wrapKernel = k: k // {
-                target = "bzImage";
-                override = args: wrapKernel (k.override args);
-              };
-            in
-              wrapKernel super.kernel;
-        });
+        # 使用最新版 CachyOS 内核
+        boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
 
         # 显式禁用设备树，避免因 CachyOS 内核缺失 buildDTBs 属性导致评估报错
         hardware.deviceTree.enable = lib.mkDefault false;
