@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs ? null, ... }:
 let
   sources = import ../npins;
 in

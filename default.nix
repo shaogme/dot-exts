@@ -1,8 +1,11 @@
-{ pkgs }:
+{ pkgs ? null, lib ? null, ... } @ args:
 let
-  lib = pkgs.lib;
-  # Function to inject pkgs into subdirectory modules
-  callExt = path: import path { inherit pkgs; };
+  resolvedLib =
+    if lib != null then lib
+    else if pkgs != null && pkgs ? lib then pkgs.lib
+    else (import <nixpkgs> { }).lib;
+
+  callExt = path: import path (if pkgs != null then { inherit pkgs; } else { });
   
   btrfs = callExt ./hardware/disk/btrfs;
   cachyos = callExt ./kernel/cachyos;
