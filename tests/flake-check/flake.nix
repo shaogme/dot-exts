@@ -18,9 +18,19 @@
         
         {
           # --- Disk Config Requirements ---
-          exts.hardware.disk.btrfs.enable = true;
-          # 'imageBaseSize' has no default, must be set
-          exts.hardware.disk.btrfs.imageBaseSize = 2048;
+          exts.hardware.disk.btrfs = {
+            enable = true;
+            imageBaseSize = 2048;
+            partitions.root = {
+              size = "100%";
+              subvolumes = {
+                "@" = { mountpoint = "/"; };
+                "@home" = { mountpoint = "/home"; };
+                "@nix" = { mountpoint = "/nix"; };
+                "@log" = { mountpoint = "/var/log"; neededForBoot = true; };
+              };
+            };
+          };
           
           # --- CachyOS Config ---
           exts.kernel.cachyos.enable = true;

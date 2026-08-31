@@ -1,124 +1,106 @@
 # 磁盘配置模块 (Disk Configuration)
 
-本模块位于 `hardware/disk/btrfs`，提供基于 [disko](https://github.com/nix-community/disko) 的标准化磁盘布局方案。旨在简化 NixOS 的磁盘配置过程，开箱即用。
+本模块位于 `hardware/disk/btrfs`，提供基于 [disko](https://github.com/nix-community/disko) 的标准化声明式磁盘布局方案。旨在简化 NixOS 的磁盘配置过程，支持灵活自定义各分区大小与显式卷拆分。
 
 ## Btrfs 布局方案 (`hardware.disk.btrfs`)
 
-这是一个针对现代系统优化的通用 Btrfs 布局，包含以下特性：
+这是一个针对现代系统优化的通用 Btrfs 声明式布局模块，包含以下特性：
 
-*   **分区结构**：
-    *   **Boot (EF02)**: 1MB，用于 BIOS 兼容启动。
-    *   **ESP (EFI System Partition)**: 32MB，挂载于 `/boot/efi`。
-    *   **Swap (可选)**: 仅当配置了 swap 大小时自动创建。
-    *   **Root (Btrfs)**: 占据生剩余所有空间。
-*   **Btrfs 子卷 (Subvolumes)**：
-    *   `@` -> `/` (根目录)
-    *   `@home` -> `/home`
-    *   `@nix` -> `/nix`
-    *   `@log` -> `/var/log`
+*   **分区结构支持**：
+    *   **Boot (EF02)**: 可选 1MB，用于 BIOS 兼容启动。
+    *   **ESP (EFI System Partition)**: 可选 32MB（或自定义），挂载于 `/boot/efi`。
+    *   **Swap (可选)**: 仅当配置了 swap 大小时自动创建对应交换分区。
+    *   **声明式 Partitions**: 允许用户显式声明任意分区及其大小、挂载点和 Btrfs 子卷。
+*   **常见布局形态**：
+    1. **多分区独立拆分模式（各分区自定义大小）**：例如将 `/nix`（30G）、`/`（10G）、`/home`（100%）拆分为独立 GPT 分区。
+    2. **单分区多子卷模式**：在单个 `root` 分区内创建 `@`、`@home`、`@nix`、`@log` 等子卷共享存储池。
 *   **优化特性**：
-    *   启用 `zstd:3` 透明压缩 (`compress-force=zstd:3`)。
-    *   启用 `noatime` 减少写入。
-    *   启用 `space_cache=v2` 提升性能。
-    *   **自动扩容**：系统首次启动时会自动修复 GPT 分区表并扩容根分区 (`boot.growPartition = true`)。
+    *   默认启用 `zstd:3` 透明压缩 (`compress-force=zstd:3`)。
+    *   默认启用 `noatime` 减少写入。
+    *   默认启用 `space_cache=v2` 提升性能。
+    *   **自动扩容**：系统首次启动时会自动修复 GPT 分区表并扩容末尾分区 (`boot.growPartition = true`)。
     *   **引导加载器**：默认配置 GRUB (`efiSupport = true`, `efiInstallAsRemovable = true`) 并禁用 systemd-boot。
 
-## 使用说明
+## 配置示例
 
-### 1. 引入模块
- 
-您可以选择通过 Flakes 或传统方式引入此模块。
- 
-#### 选项 A: Flake 方式 (推荐)
- 
-在 `flake.nix` 中：
- 
+### 1. 多分区独立拆分方案（自定义各卷大小）
+
 ```nix
-{
-  inputs.dot-exts.url = "github:shaogme/dot-exts";
- 
-  outputs = { self, nixpkgs, dot-exts, ... }: {
-    nixosConfigurations.my-machine = nixpkgs.lib.nixosSystem {
-      # ...
-      modules = [
-        dot-exts.nixosModules.hardware.disk.btrfs
- 
-        # 注意: dot-exts.nixosModules.default 目前是空模块，不自动引入任何组件
-      ];
+exts.hardware.disk.btrfs = {
+  enable = true;
+  device = "/dev/vda";
+  swapSize = 2048;
+  imageBaseSize = 61440;
+  partitions = {
+    root = {
+      size = "10G";
+      mountpoint = "/";
+    };
+    nix = {
+      size = "30G";
+      mountpoint = "/nix";
+    };
+    home = {
+      size = "100%";
+      mountpoint = "/home";
     };
   };
-}
+};
 ```
- 
-#### 选项 B: 传统方式 (npins)
- 
-推荐使用 `npins` 来管理依赖，替代传统的 `fetchTarball` 或 `git submodule`。
- 
-1. 初始化并添加本仓库依赖：
- 
-```bash
-npins init
-npins add github -b main shaogme dot-exts
-```
- 
-2. 在像配置中引入：
- 
+
+### 2. 单分区多子卷方案（VPS 标准布局）
+
 ```nix
-{ pkgs, ... }:
-let
-  sources = import ./npins;
-  # 获取 dot-exts 仓库实例
-  dot-exts = import sources.dot-exts { inherit pkgs; };
-in
-{
-  imports = [
-    # 导入 Btrfs 磁盘配置模块
-    dot-exts.hardware.disk.btrfs.nixosModule
-  ];
- 
-  # ... 其他配置
-}
+exts.hardware.disk.btrfs = {
+  enable = true;
+  device = "/dev/vda";
+  swapSize = 2048;
+  imageBaseSize = 3072;
+  partitions.root = {
+    size = "100%";
+    subvolumes = {
+      "@" = { mountpoint = "/"; };
+      "@home" = { mountpoint = "/home"; };
+      "@nix" = { mountpoint = "/nix"; };
+      "@log" = { mountpoint = "/var/log"; neededForBoot = true; };
+    };
+  };
+};
 ```
 
-### 3. npins 方式完整安装示例
+### 3. disko-entrypoint.nix (双模式入口示例)
 
-以下展示了通过 standard 方式（非 Flake），结合 `npins` 管理依赖并使用 `disko-entrypoint.nix` 进行部署的完整流程。
- 
-这种方式允许文件既作为 NixOS 模块被引入，又可以被 `disko` CLI 直接调用以执行分区。
- 
-**disko-entrypoint.nix (双模式入口)**:
- 
 ```nix
 { pkgs ? import <nixpkgs> { }, modulesPath ? null, ... }:
- 
+
 if modulesPath != null then
-  # ---------------------------------------------------------
-  # Mode 1: NixOS Module (Imported by configuration.nix)
-  # ---------------------------------------------------------
   let
     sources = import ./npins;
     dot-exts = import sources.dot-exts { inherit pkgs; };
   in
   {
     imports = [
-      # 通过导出的结构引入模块 (包含 disko)
       dot-exts.hardware.disk.btrfs.nixosModule
     ];
- 
-    # 配置模块
+
     config.exts.hardware.disk.btrfs = {
       enable = true;
-      device = "/dev/sda"; # 建议使用 /dev/disk/by-id/...
+      device = "/dev/sda";
       swapSize = 4096;
       imageBaseSize = 3072;
+      partitions.root = {
+        size = "100%";
+        subvolumes = {
+          "@" = { mountpoint = "/"; };
+          "@home" = { mountpoint = "/home"; };
+          "@nix" = { mountpoint = "/nix"; };
+          "@log" = { mountpoint = "/var/log"; neededForBoot = true; };
+        };
+      };
     };
   }
 else
-  # ---------------------------------------------------------
-  # Mode 2: CLI Entrypoint (Called by disko CLI)
-  # ---------------------------------------------------------
   {
-    # 假设 ./host/default.nix 是您的系统构建入口 (调用了 lib.nixosSystem)
     disko.devices = (import ./host/default.nix).config.disko.devices;
   }
 ```

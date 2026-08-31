@@ -13,21 +13,35 @@ let
 
   # Evaluate all static checks
   allChecks = [
-    (check "Btrfs Module - Root Filesystem (/)" btrfsTest.hasRootFs)
-    (check "Btrfs Module - Home Filesystem (/home)" btrfsTest.hasHomeFs)
-    (check "Btrfs Module - Nix Filesystem (/nix)" btrfsTest.hasNixFs)
-    (check "Btrfs Module - Image Size Calculation" (btrfsTest.imageSizeCheck == "7168M"))
-    (check "Btrfs Module - Disko Config Generated" (btrfsTest.diskoConfig != null))
+    # 1. 单分区多子卷检查
+    (check "Subvols - Root Filesystem (/)" btrfsTest.subvols.hasRootFs)
+    (check "Subvols - Home Filesystem (/home)" btrfsTest.subvols.hasHomeFs)
+    (check "Subvols - Nix Filesystem (/nix)" btrfsTest.subvols.hasNixFs)
+    (check "Subvols - Log Filesystem (/var/log)" btrfsTest.subvols.hasLogFs)
+    (check "Subvols - Log Needed For Boot" btrfsTest.subvols.isLogNeededForBoot)
+    (check "Subvols - Image Size Calculation" (btrfsTest.subvols.imageSizeCheck == "7168M"))
+    (check "Subvols - Disko Config Generated" (btrfsTest.subvols.diskoConfig != null))
+
+    # 2. 多分区独立拆分检查
+    (check "Split - Root Filesystem (/)" btrfsTest.split.hasRootFs)
+    (check "Split - Home Filesystem (/home)" btrfsTest.split.hasHomeFs)
+    (check "Split - Nix Filesystem (/nix)" btrfsTest.split.hasNixFs)
+    (check "Split - Root Partition Size (10G)" (btrfsTest.split.rootPartSize == "10G"))
+    (check "Split - Nix Partition Size (30G)" (btrfsTest.split.nixPartSize == "30G"))
+    (check "Split - Home Partition Size (100%)" (btrfsTest.split.homePartSize == "100%"))
+    (check "Split - Image Size Calculation" (btrfsTest.split.imageSizeCheck == "63488M"))
+    (check "Split - Disko Config Generated" (btrfsTest.split.diskoConfig != null))
   ];
 
 in
 {
-  # 1. 静态检查任务：构建这个 derivation 会运行所有的 assert 检查
+  # 静态检查任务：运行所有 assert 检查和 Disko 脚本生成测试（不进行全量系统编译）
   staticCheck = pkgs.runCommand "disk-static-check" {} ''
     echo "Evaluating Static Checks..."
     echo "Checks result: ${toString allChecks}"
-    echo "Verifying generated Disko script syntax..."
-    echo "${btrfsTest.diskoScript}" > /dev/null
+    echo "Verifying generated Disko scripts..."
+    echo "${btrfsTest.subvols.diskoScript}" > /dev/null
+    echo "${btrfsTest.split.diskoScript}" > /dev/null
     echo "All static checks passed!"
     touch $out
   '';
