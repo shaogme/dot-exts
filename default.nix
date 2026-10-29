@@ -1,11 +1,14 @@
 { pkgs ? null, lib ? null, ... } @ args:
 let
+  sources = import ./npins;
+  resolvedPkgs =
+    if pkgs != null then pkgs
+    else import (sources.nixpkgs { }) { };
   resolvedLib =
     if lib != null then lib
-    else if pkgs != null && pkgs ? lib then pkgs.lib
-    else (import <nixpkgs> { }).lib;
+    else resolvedPkgs.lib;
 
-  callExt = path: import path (if pkgs != null then { inherit pkgs; } else { });
+  callExt = path: import path { pkgs = resolvedPkgs; };
   
   btrfs = callExt ./hardware/disk/btrfs;
   cachyos = callExt ./kernel/cachyos;

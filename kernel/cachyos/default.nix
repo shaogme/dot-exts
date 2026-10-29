@@ -62,10 +62,10 @@ in
         # 添加 CachyOS 的 binary cache 配置
         nix.settings = {
           substituters = [
-            "https://attic.xuyh0120.win/lantian"
+            "https://cache.lantian.pub/lantian"
           ];
           trusted-public-keys = [
-            "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc="
+            "lantian:WVGO7vsRMSEN+h7Lp7kv6SAmrkEXgUGbbXm7jMDjBuQ="
           ];
         };
       };
