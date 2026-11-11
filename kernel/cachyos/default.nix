@@ -57,7 +57,7 @@ in
         
         # scx_rustland 旨在将交互式工作负载优先于后台CPU密集型工作负载
         # 这里默认关闭，因为需要额外的 scx 包支持
-        services.scx.enable = lib.mkDefault false;
+        services.scx-loader.enable = lib.mkDefault false;
 
         # 添加 CachyOS 的 binary cache 配置
         nix.settings = {
